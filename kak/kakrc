@@ -38,8 +38,6 @@ define-command edit-notes -params 1 \
 
 complete-command edit-notes shell-script-candidates %{ cd "$kak_opt_notes_path"; fd -e md ".*" .}
 
-
-
 # Theme
 
 colorscheme kanagawa
@@ -50,14 +48,7 @@ add-highlighter global/ show-whitespaces
 
 # Filetype specific hooks
 # ───────────────────────
-
-
-# hook global WinSetOption filetype=(c|cpp) %{
-#     clang-enable-autocomplete 
-#     clang-enable-diagnostics
-#     alias window lint clang-parse
-#     alias window lint-next-error clang-diagnostics-next
-# }
+ 
 
 ### Plug.kak ####
 evaluate-commands %sh{
@@ -119,6 +110,7 @@ plug "andreyorst/fzf.kak" config %{
     set-option global fzf_highlight_command 'bat'
 }
 plug "alexherbo2/auto-pairs.kak"
+enable-auto-pairs
 
 plug "h-youhei/kakoune-surround"
 
