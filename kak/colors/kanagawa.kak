@@ -1,3 +1,8 @@
+#######################################################
+# Taken from https://github.com/anhsirk0/kakoune-themes
+#######################################################
+
+
 # Kanagawa theme for Kakoune
 
 # Color palette
