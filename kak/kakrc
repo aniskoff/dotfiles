@@ -46,11 +46,9 @@ colorscheme kanagawa
 hook global WinCreate ^[^*]+$ %{ add-highlighter window/ number-lines -relative -hlcursor }
 add-highlighter global/ show-whitespaces
 
-# Filetype specific hooks
-# ───────────────────────
- 
 
-### Plug.kak ####
+
+### Auto-Install Plug.kak ####
 evaluate-commands %sh{
     plugins="$kak_config/plugins"
     mkdir -p "$plugins"
@@ -58,20 +56,42 @@ evaluate-commands %sh{
         git clone -q https://github.com/andreyorst/plug.kak.git "$plugins/plug.kak"
     printf "%s\n" "source '$plugins/plug.kak/rc/plug.kak'"
 }
+
 plug "andreyorst/plug.kak" noload
 
-###
-plug "lePerdu/kakboard" %{
-    hook global WinCreate .* %{ kakboard-enable }
-}
 
-
+# Plugins
 plug "kak-lsp/kak-lsp" do %{
     cargo install --locked --force --path .
     # optional: if you want to use specific language servers
     mkdir -p ~/.config/kak-lsp
     cp -n kak-lsp.toml ~/.config/kak-lsp/
 }
+
+
+set-option global lsp_config %{
+    [language.python.settings._]
+    "pylsp.configurationSources" = ["flake8"]
+}
+
+plug "lePerdu/kakboard" %{
+    hook global WinCreate .* %{ kakboard-enable }
+}
+
+plug "andreyorst/fzf.kak" config %{
+    map -docstring 'fzf mode' global normal '<c-p>' ': fzf-mode<ret>'
+} defer fzf %{
+    set-option global fzf_grep_command 'rg'
+    set-option global fzf_file_command 'fd'
+    set-option global fzf_highlight_command 'bat'
+}
+
+plug "alexherbo2/auto-pairs.kak"
+enable-auto-pairs
+
+plug "h-youhei/kakoune-surround"
+
+plug 'delapouite/kakoune-livedown'
 
 plug "basbebe/pandoc.kak"
 
@@ -81,18 +101,14 @@ hook global WinSetOption filetype=(asciidoc|fountain|html|latex|markdown) %{
     set-option global pandoc_options '-d default'
 }
 
+
+# Filetype specific hooks
+# ───────────────────────
+ 
 hook global WinSetOption filetype=(python|c|cpp|hs) %{
     lsp-enable-window
     lsp-auto-hover-enable
 }
-
-
-
-set-option global lsp_config %{
-    [language.python.settings._]
-    "pylsp.configurationSources" = ["flake8"]
-}
-
 
 
 hook global WinSetOption filetype=python %{
@@ -102,16 +118,3 @@ hook global WinSetOption filetype=python %{
 }
 
 
-plug "andreyorst/fzf.kak" config %{
-    map -docstring 'fzf mode' global normal '<c-p>' ': fzf-mode<ret>'
-} defer fzf %{
-    set-option global fzf_grep_command 'rg'
-    set-option global fzf_file_command 'fd'
-    set-option global fzf_highlight_command 'bat'
-}
-plug "alexherbo2/auto-pairs.kak"
-enable-auto-pairs
-
-plug "h-youhei/kakoune-surround"
-
-plug 'delapouite/kakoune-livedown'
