@@ -1,0 +1,15 @@
+.DS_Store
+QtProject/
+configstore/
+helix/
+htop/
+iterm2/
+jgit/
+kak/autoload/
+kak/plugins/
+kak-lsp/
+karabiner/
+lf/
+taskell/
+texstudio/
+wireshark/
