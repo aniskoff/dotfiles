@@ -1,0 +1,125 @@
+# Hints
+set -add global autoinfo normal
+
+define-command edit-config -command-completion -docstring "Edit config file kakrc" %{
+    edit "%val{config}/kakrc"
+}
+
+# Splits
+
+define-command -docstring "vsplit [<commands>]: split tmux vertically" \
+vsplit -params .. -command-completion %{
+    tmux-terminal-horizontal kak -c %val{session} -e "%arg{@}"
+}
+
+define-command -docstring "split [<commands>]: split tmux horizontally" \
+split -params .. -command-completion %{
+    tmux-terminal-vertical kak -c %val{session} -e "%arg{@}"
+}
+
+define-command -docstring "tabnew [<commands>]: create new tmux window" \
+tabnew -params .. -command-completion %{
+    tmux-terminal-window kak -c %val{session} -e "%arg{@}"
+}
+
+map global user / :vsplit<ret> -docstring "Split horizontally"
+map global user = :vsplit<ret> -docstring "Split vertically"
+
+
+
+declare-option str notes_path "/Users/Nick/Library/Mobile Documents/iCloud~md~obsidian/Documents/MVault/"
+
+
+define-command edit-notes -params 1 \
+    -docstring "Edit notes file" \
+%{ evaluate-commands %sh{
+    echo "edit %{$kak_opt_notes_path/$1}"
+}}
+
+complete-command edit-notes shell-script-candidates %{ cd "$kak_opt_notes_path"; fd -e md ".*" .}
+
+
+
+# Theme
+
+colorscheme kanagawa
+
+# hook global WinCreate ^[^*]+$ %{ add-highlighter window/ number-lines -hlcursor }
+hook global WinCreate ^[^*]+$ %{ add-highlighter window/ number-lines -relative -hlcursor }
+add-highlighter global/ show-whitespaces
+
+# Filetype specific hooks
+# ───────────────────────
+
+
+# hook global WinSetOption filetype=(c|cpp) %{
+#     clang-enable-autocomplete 
+#     clang-enable-diagnostics
+#     alias window lint clang-parse
+#     alias window lint-next-error clang-diagnostics-next
+# }
+
+### Plug.kak ####
+evaluate-commands %sh{
+    plugins="$kak_config/plugins"
+    mkdir -p "$plugins"
+    [ ! -e "$plugins/plug.kak" ] && \
+        git clone -q https://github.com/andreyorst/plug.kak.git "$plugins/plug.kak"
+    printf "%s\n" "source '$plugins/plug.kak/rc/plug.kak'"
+}
+plug "andreyorst/plug.kak" noload
+
+###
+plug "lePerdu/kakboard" %{
+    hook global WinCreate .* %{ kakboard-enable }
+}
+
+
+plug "kak-lsp/kak-lsp" do %{
+    cargo install --locked --force --path .
+    # optional: if you want to use specific language servers
+    mkdir -p ~/.config/kak-lsp
+    cp -n kak-lsp.toml ~/.config/kak-lsp/
+}
+
+plug "basbebe/pandoc.kak"
+
+
+hook global WinSetOption filetype=(asciidoc|fountain|html|latex|markdown) %{
+    require-module pandoc
+    set-option global pandoc_options '-d default'
+}
+
+hook global WinSetOption filetype=(python|c|cpp|hs) %{
+    lsp-enable-window
+    lsp-auto-hover-enable
+}
+
+
+
+set-option global lsp_config %{
+    [language.python.settings._]
+    "pylsp.configurationSources" = ["flake8"]
+}
+
+
+
+hook global WinSetOption filetype=python %{
+    jedi-enable-autocomplete
+    # lint-enable
+    set-option global lintcmd 'flake8'
+}
+
+
+plug "andreyorst/fzf.kak" config %{
+    map -docstring 'fzf mode' global normal '<c-p>' ': fzf-mode<ret>'
+} defer fzf %{
+    set-option global fzf_grep_command 'rg'
+    set-option global fzf_file_command 'fd'
+    set-option global fzf_highlight_command 'bat'
+}
+plug "alexherbo2/auto-pairs.kak"
+
+plug "h-youhei/kakoune-surround"
+
+plug 'delapouite/kakoune-livedown'
