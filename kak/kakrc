@@ -23,8 +23,8 @@ tabnew -params .. -command-completion %{
 }
 
 map global user / :vsplit<ret> -docstring "Split horizontally"
-map global user = :vsplit<ret> -docstring "Split vertically"
-
+map global user = :split<ret> -docstring "Split vertically"
+map global user n ":lsp-next-location *goto*<ret>" -docstring "LSP next location"
 
 
 declare-option str notes_path "/Users/Nick/Library/Mobile Documents/iCloud~md~obsidian/Documents/MVault/"
